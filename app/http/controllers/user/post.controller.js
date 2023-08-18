@@ -59,7 +59,7 @@ class PostsController {
       const post = await PostModel.findById(postID);
       if (!post) throw createError.NotFound("Post not found❗");
       await editPostValidator.validateAsync(req.body);
-      await deleteInvalidPropertiesOfObject(req.body, [
+      deleteInvalidPropertiesOfObject(req.body, [
         "picture",
         "user",
         "likes",

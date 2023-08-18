@@ -8,7 +8,24 @@
 
 /**
  * @swagger
- *  /user/{targetUserID}/follow:
+ *  /{targetUserID}:
+ *      get:
+ *          tags: [User(InteractionsSection)]
+ *          parameters:
+ *              -   in: path
+ *                  name: targetUserID
+ *                  required: true
+ *                  type: string
+ *          responses:
+ *              200:
+ *                  description: Success
+ *              400:
+ *                  description: Bad Request
+ */
+
+/**
+ * @swagger
+ *  /{targetUserID}/follow:
  *      patch:
  *          tags: [User(InteractionsSection)]
  *          parameters:
@@ -24,12 +41,12 @@
  */
 /**
  * @swagger
- *  /user/{targetUserID}/unfollow:
+ *  /{targetUserID}/unfollow:
  *      patch:
  *          tags: [User(InteractionsSection)]
  *          parameters:
  *              -   in: path
- *                  name: userID
+ *                  name: targetUserID
  *                  required: true
  *                  type: string
  *          responses:
@@ -38,3 +55,4 @@
  *              400:
  *                  description: Bad Request
  */
+
