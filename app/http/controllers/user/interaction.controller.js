@@ -31,7 +31,6 @@ class InteractionController {
     const originUser = req.user;
     const { targetUserID } = req.params;
     const targetUser = await UserModel.findById(targetUserID);
-    if (!targetUser) throw createError.NotFound("User does not exist.");
     const addToFollowingsResult = await UserModel.updateOne(
       { _id: originUser._id },
       { $push: { followings: targetUserID } }
@@ -53,16 +52,22 @@ class InteractionController {
   }
 
   async unfollow(req, res, next) {
+    const originUserID = req.user._id;
     const { id: targetUserID } = await objectIdValidator.validateAsync({
       id: req.params.targetUserID,
     });
-    const targetUser = await UserModel.findById(targetUserID);
-    if (!targetUser) throw createError.NotFound("User does not exist❗");
-    if (req.user.followings.includes(targetUserID)) {
-      req.user.followings.pull(targetUserID);
-      await req.user.save();
-    } else
-      throw createError.BadRequest(`You do not follow ${targetUser.username}`);
+    await UserModel.findByIdAndUpdate(originUserID, {
+      $pull: { followings: targetUserID },
+    });
+    await UserModel.findByIdAndUpdate(targetUserID, {
+      $pull: { followers: originUserID },
+    });
+    return res.status(HttpStatus.OK).json({
+      statusCode: HttpStatus.OK,
+      data: {
+        message: "You unfollowed this user successfully✔️",
+      },
+    });
   }
 }
 

@@ -30,6 +30,7 @@ const stringToArray = function (...args) {
   };
 };
 
+
 module.exports = {
   stringToArray,
 };

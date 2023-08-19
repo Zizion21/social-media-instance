@@ -1,5 +1,11 @@
 const { default: mongoose } = require("mongoose");
 
+const notificationSchema = new mongoose.Schema({
+    sender: {type: mongoose.Types.ObjectId, ref: 'user', required: true},
+    notificationText: {type: String},
+    confirm: {type: Boolean, default: false}
+})
+
 const userSchema = new mongoose.Schema({
     username: {type: String, unique: true},
     password: {type: String},
@@ -11,6 +17,7 @@ const userSchema = new mongoose.Schema({
     profile_image: {type: String, default: ''},
     followers: {type: [mongoose.Types.ObjectId], ref: 'user', default: []},
     followings: {type: [mongoose.Types.ObjectId], ref: 'user', default: []},
+    notifications: {type: [notificationSchema], default: []},
     token: {type: String, default: ""},
     posts: {type: [mongoose.Types.ObjectId], ref: 'post', default: []},
     bio: {type: String, default: ''},
