@@ -73,6 +73,12 @@
  *                      description: Enter your username
  *                  password:
  *                      type: string
+ *          ConfirmNotifications:
+ *              type: object
+ *              properties:
+ *                  isAccepted:
+ *                      type: boolean
+ *                      description: Confirm or deny the follow request
  */
 
 /**
@@ -88,6 +94,42 @@
  *      get:
  *          tags: [UserSection]
  *          summary: User Profile
+ *          responses:
+ *              200:
+ *                  description: Success
+ *              400:
+ *                  description: Bad Request
+ */
+
+/**
+ * @swagger
+ *  /user/notifications:
+ *      get:
+ *          tags: [UserSection]
+ *          summary: User Profile
+ *          responses:
+ *              200:
+ *                  description: Success
+ *              400:
+ *                  description: Bad Request
+ */
+
+/**
+ * @swagger
+ *  /user/notifications/{id}:
+ *      patch:
+ *          tags: [UserSection]
+ *          parameters:
+ *              -   in: path
+ *                  type: string
+ *                  name: id
+ *                  required: true
+ *          requestBody:
+ *              required: true
+ *              content:
+ *                  application/x-www-form-urlencoded:
+ *                      schema:
+ *                          $ref: '#/components/schemas/ConfirmNotifications'
  *          responses:
  *              200:
  *                  description: Success

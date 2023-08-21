@@ -6,7 +6,7 @@ async function sendFollowRequest(req, res, next){
     const targetUser = await UserModel.findById(targetUserID);
     const sender = req.user;
     if(targetUser.isPrivate == true){
-        targetUser.notifications.pull({sender: sender._id, notificationText: `${sender.username} sent a request to follow you`});
+        targetUser.notifications.push({sender: sender._id, notificationText: `${sender.username} sent a request to follow you`});
         await targetUser.save();
         return res.status(HttpStatus.OK).json({
             statusCode: HttpStatus.OK,

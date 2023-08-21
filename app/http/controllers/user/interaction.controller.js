@@ -2,6 +2,7 @@ const { UserModel } = require("../../../models/users.model");
 const createError = require("http-errors");
 const { StatusCodes: HttpStatus } = require("http-status-codes");
 const { objectIdValidator } = require("../../validators/public.validator");
+const { followUser } = require("../../../utils/functions");
 require("express-async-errors");
 
 class InteractionController {
@@ -11,7 +12,15 @@ class InteractionController {
       id: req.params.targetUserID,
     });
     const isFollowing = originUser.isFollowing(targetUserID);
-    const targetUser = await UserModel.findById(targetUserID);
+    const targetUser = await UserModel.findById(targetUserID).select({
+      _id: 0,
+      username: 1,
+      profile_image: 1,
+      followers: 1,
+      followings: 1,
+      bio: 1,
+      posts: 1
+    });
     if (!targetUser) throw createError.NotFound("User does not exist❌");
     if (targetUser.isPrivate == true && isFollowing == false) {
       return res.status(HttpStatus.FORBIDDEN).json({
@@ -22,7 +31,7 @@ class InteractionController {
     return res.status(HttpStatus.OK).json({
       statusCode: HttpStatus.OK,
       data: {
-        targetUser,
+        targetUser
       },
     });
   }
@@ -31,18 +40,8 @@ class InteractionController {
     const originUser = req.user;
     const { targetUserID } = req.params;
     const targetUser = await UserModel.findById(targetUserID);
-    const addToFollowingsResult = await UserModel.updateOne(
-      { _id: originUser._id },
-      { $push: { followings: targetUserID } }
-    );
-    const addToFollowersResult = await UserModel.updateOne(
-      { _id: targetUserID },
-      { $addToSet: { followers: originUser._id } }
-    );
-    if (
-      addToFollowingsResult.modifiedCount &&
-      addToFollowersResult.modifiedCount
-    )
+    const followProcess = followUser(originUser, targetUserID);
+    if (followProcess)
       return res.status(HttpStatus.OK).json({
         statusCode: HttpStatus.OK,
         data: {

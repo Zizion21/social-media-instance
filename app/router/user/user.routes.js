@@ -8,6 +8,10 @@ const router = require('express').Router();
 
 //Get user profile
 router.get('/profile', UserController.getUserProfile);
+//Get notifications
+router.get('/notifications', UserController.getNotifications);
+//Accept | Deny notification
+router.patch('/notifications/:id', UserController.confirmNotifications)
 //Update user info
 router.patch('/update', getUpdatedKeys, uploadImage.single('profile_image'), UserController.updateUserInfo);
 //Deleting account

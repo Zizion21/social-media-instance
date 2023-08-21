@@ -3,7 +3,13 @@ const { default: mongoose } = require("mongoose");
 const notificationSchema = new mongoose.Schema({
     sender: {type: mongoose.Types.ObjectId, ref: 'user', required: true},
     notificationText: {type: String},
-    confirm: {type: Boolean, default: false}
+    isAccepted: {type: Boolean, default: false}
+},{ 
+    id: false,
+    timestamps: true,
+    toJSON:{
+        virtuals: true
+    }
 })
 
 const userSchema = new mongoose.Schema({
@@ -22,8 +28,9 @@ const userSchema = new mongoose.Schema({
     posts: {type: [mongoose.Types.ObjectId], ref: 'post', default: []},
     bio: {type: String, default: ''},
     isPrivate: {type: Boolean, default: false},
-    isAdmin: {type: Boolean, default: false}
+    isAdmin: {type: Boolean, default: false},
 }, {
+    id: false,
     timestamps: true,
     toJSON: {
         virtuals: true
