@@ -6,6 +6,8 @@ const { uploadImage } = require('../../utils/multer');
 const { PostRoutes } = require('./post.routes');
 const router = require('express').Router();
 
+//Home
+router.get('/', UserController.home)
 //Get user profile
 router.get('/profile', UserController.getUserProfile);
 //Get notifications

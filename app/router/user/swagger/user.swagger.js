@@ -90,6 +90,18 @@
 
 /**
  * @swagger
+ *  /user:
+ *      get:
+ *          tags: [UserSection]
+ *          summary: Home
+ *          responses:
+ *              200:
+ *                  description: Success
+ *              400:
+ *                  description: Bad Request
+ */
+/**
+ * @swagger
  *  /user/profile:
  *      get:
  *          tags: [UserSection]
