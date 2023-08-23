@@ -20,9 +20,17 @@ const postSchema = new mongoose.Schema(
     isShown: { type: Boolean, default: true },
   },
   {
+    id: false,
     timestamps: true,
+    toJSON:{
+      virtuals: true
+    }
   }
 );
+
+postSchema.methods.isLiked = function(userID){
+  return this.likes.includes(userID)
+}
 
 module.exports = {
   PostModel: mongoose.model("post", postSchema),

@@ -7,6 +7,7 @@ const {
   editPostValidator,
 } = require("../../validators/user/post.validator");
 const { deleteInvalidPropertiesOfObject } = require("../../../utils/functions");
+const { objectIdValidator } = require("../../validators/public.validator");
 
 class PostsController {
   async gettingAllPosts(req, res, next) {
@@ -101,6 +102,39 @@ class PostsController {
       console.log(error);
       next(error);
     }
+  }
+  async likePostsByID(req, res, next) {
+    const { _id: userID } = req.user;
+    const { id: postID } = await objectIdValidator.validateAsync(req.params);
+    const post = await PostModel.findById(postID);
+    if (!post) throw createError.NotFound("Post not found");
+    const isLiked = post.isLiked(userID);
+    if (isLiked == false) {
+      const likingPostResult = await PostModel.updateOne(
+        { _id: postID },
+        { $push: { likes: userID } }
+      );
+      if (!likingPostResult)
+        throw createError.InternalServerError("Failed to like the post❌");
+      return res.status(HttpStatus.OK).json({
+        statusCode: HttpStatus.OK,
+        data: {
+          message: "You liked this post✨",
+        },
+      });
+    }
+    const dislikingPostResult = await PostModel.updateOne(
+      { _id: postID },
+      { $pull: { likes: userID } }
+    );
+    if (!dislikingPostResult)
+      throw createError.InternalServerError("Failed to dislike the post❌");
+    return res.status(HttpStatus.OK).json({
+      statusCode: HttpStatus.OK,
+      data: {
+        message: "You disliked this post.",
+      },
+    });
   }
 }
 module.exports = {

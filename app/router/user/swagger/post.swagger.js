@@ -106,3 +106,35 @@
  *              400:
  *                  description: Bad Request
  */
+/**
+ * @swagger
+ *  /user/posts/{id}/like:
+ *      patch:
+ *          tags: [User(PostSection)]
+ *          parameters:
+ *              -   in: path
+ *                  type: string
+ *                  name: id
+ *                  required: true
+ *          responses:
+ *              200:
+ *                  description: Success
+ *              500:
+ *                  description: Server Error
+ */
+/**
+ * @swagger
+ *  /user/posts/{id}/dislike:
+ *      patch:
+ *          tags: [User(PostSection)]
+ *          parameters:
+ *              -   in: path
+ *                  type: string
+ *                  name: id
+ *                  required: true
+ *          responses:
+ *              200:
+ *                  description: Success
+ *              500:
+ *                  description: Server Error
+ */

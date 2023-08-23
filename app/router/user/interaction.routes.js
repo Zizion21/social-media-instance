@@ -1,5 +1,5 @@
 const { InteractionController } = require('../../http/controllers/user/interaction.controller');
-const { checkIsFollowing, checkIsNotFollowing } = require('../../http/middlewares/checkFollow');
+const { checkIsNotFollowing, checkIsFollowing } = require('../../http/middlewares/checkIDExistsInArray');
 const { sendFollowRequest } = require('../../http/middlewares/sendFollowReq');
 const router = require('express').Router();
 

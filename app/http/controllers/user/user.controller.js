@@ -19,19 +19,24 @@ require("express-async-errors");
 class UserController extends Controller {
   async home(req, res, next) {
     const { _id } = req.user;
+    const threeDaysAgo = new Date();
+    threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
     const userFollowings = await UserModel.findOne({ _id })
-      // .select({ _id: 1 })
       .populate({
         path: "followings",
-        select: { _id:0, posts: 1 },
-        populate: { 
-          path: "posts", 
-          select: { isShown: 0, __v: 0} ,
-          match: {isShown : true}
+        select: { _id: 0, posts: 1 },
+        populate: {
+          path: "posts",
+          select: { isShown: 0, __v: 0 },
+          match: { 
+            isShown: true, 
+            createdAt: { 
+              $gte: threeDaysAgo 
+            } 
+          },
+          options: {sort: {createdAt: -1}}
         },
-      })
-    .sort("followings.posts.createdAt");
-    // console.log(userFollowings.followings);
+      });
     return res.send(userFollowings.followings);
   }
   async getUserProfile(req, res, next) {
