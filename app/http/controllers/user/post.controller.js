@@ -136,6 +136,32 @@ class PostsController {
       },
     });
   }
+  async leaveCommentsByPostID(req, res, next) {
+    const { _id: userID } = req.user;
+    const { id: postID } = await objectIdValidator.validateAsync(req.params);
+    const post = await PostModel.findById(postID);
+    if (!post) throw createError.NotFound("Post not found");
+    const { text } = req.body;
+    const updatePostResult = await PostModel.updateOne(
+      { _id: postID},
+      {
+        $push:{
+          'comments':{
+            user: userID,
+            text
+          }
+        }
+      }
+    );
+    if (!updatePostResult)
+      throw createError.InternalServerError("Failed to send the comment❌");
+    return res.status(HttpStatus.OK).json({
+      statusCode: HttpStatus.OK,
+      data: {
+        message: "Comment sent successfully✔️",
+      },
+    });
+  }
 }
 module.exports = {
   PostsController: new PostsController(),

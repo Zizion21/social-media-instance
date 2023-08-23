@@ -14,7 +14,9 @@ router.patch("/edit/:id", stringToArray('tags'), PostsController.editPost);
 //Deleting posts
 router.delete("/delete/:id", PostsController.deletePostByID);
 //Liking a post
-router.patch('/:id/like', PostsController.likePostsByID)
+router.patch('/:id/like', PostsController.likePostsByID);
+//Leaving comments
+router.patch('/:id/leave-comments', PostsController.leaveCommentsByPostID);
 
 module.exports = {
   PostRoutes: router,

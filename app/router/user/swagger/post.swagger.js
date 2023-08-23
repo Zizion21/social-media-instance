@@ -28,6 +28,14 @@
  *                      description: No spaces between tags
  *                  isShown:
  *                      type: boolean
+ *          LeaveComments:
+ *              type: object
+ *              required:
+ *                  -   text
+ *              properties:
+ *                  text:
+ *                      type: string
+ *                      description: Write a comment...
  */
 
 /**
@@ -124,7 +132,7 @@
  */
 /**
  * @swagger
- *  /user/posts/{id}/dislike:
+ *  /user/posts/{id}/leave-comments:
  *      patch:
  *          tags: [User(PostSection)]
  *          parameters:
@@ -132,6 +140,12 @@
  *                  type: string
  *                  name: id
  *                  required: true
+ *          requestBody:
+ *              required: true
+ *              content:
+ *                  application/x-www-form-urlencoded:
+ *                      schema:
+ *                          $ref: '#/components/schemas/LeaveComments'
  *          responses:
  *              200:
  *                  description: Success
