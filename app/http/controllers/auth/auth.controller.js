@@ -5,20 +5,30 @@ const {
   signRefreshToken,
   verifyRefreshToken,
   deleteInvalidPropertiesOfObject,
+  randomNumberGenerator,
 } = require("../../../utils/functions");
 const {
   registerValidator,
   loginValidator,
+  resetPassValidator,
 } = require("../../validators/user/auth.validator");
 const Controller = require("../controller");
 const createError = require("http-errors");
 const { StatusCodes: HttpStatus } = require("http-status-codes");
 const bcrypt = require("bcrypt");
 require("express-async-errors");
+const nodemailer = require("nodemailer");
 
 class AuthController extends Controller {
   async register(req, res, next) {
-    deleteInvalidPropertiesOfObject(req.body, ['_id', 'followers', 'followings', 'posts', 'token', 'isAdmin']);
+    deleteInvalidPropertiesOfObject(req.body, [
+      "_id",
+      "followers",
+      "followings",
+      "posts",
+      "token",
+      "isAdmin",
+    ]);
     await registerValidator.validateAsync(req.body);
     const {
       username,
@@ -85,7 +95,7 @@ class AuthController extends Controller {
   }
   async refreshToken(req, res, next) {
     const { refreshToken } = req.body;
-    const userID = await verifyRefreshToken(refreshToken);
+    const userID = verifyRefreshToken(refreshToken);
     const newAccessToken = await signAccessToken(userID);
     const newRefreshToken = await signRefreshToken(userID);
     return res.status(HttpStatus.OK).json({
@@ -96,7 +106,51 @@ class AuthController extends Controller {
       },
     });
   }
-  async resetPassword(req, res, next) {}
+  async resetPassword(req, res, next) {
+    await resetPassValidator.validateAsync(req.body);
+    const { email } = req.body;
+    const user = await UserModel.findOne({ email });
+    if (!user) throw createError.NotFound("User does not exist❌");
+    const code = randomNumberGenerator();
+    let resetPassCode = {
+      code,
+      expiresIn: (new Date().getTime() + 120000),
+      isConfirmed: false
+    }
+    deleteInvalidPropertiesOfObject(resetPassCode);
+    const saveConfirmResetPassCodeResult = await user.updateOne({$set: {resetPassCode}});
+    if(!saveConfirmResetPassCodeResult) throw createError.InternalServerError('Process failed⚠️')
+    const transport = nodemailer.createTransport({
+      host: process.env.EMAIL_HOST,
+      port: process.env.EMAIL_HOST_PORT,
+      secure: false,
+      auth: {
+        user: process.env.EMAIL_HOST_USERNAME,
+        pass: process.env.EMAIL_HOST_PASS,
+      },
+      tls: {
+        rejectUnauthorized: false,
+      },
+    });
+    const mailOptions = {
+      from: "Zizion's Scocial-Media-Instance",
+      to: email,
+      subject: "Reset Password!",
+      text: `Hi ${user.username}✨
+      This is an email for you to reset your password.
+      Here is your code: ${code}`
+    };
+    transport.sendMail(mailOptions, (error, info) => {
+      if (error) throw createError.InternalServerError(error);
+      return res.status(HttpStatus.OK).json({
+        statusCode: HttpStatus.OK,
+        data: {
+          // messageID: info.messageId,
+          message: `Email successfully sent to: ${info.envelope.to[0]}`,
+        },
+      });
+    });
+  }
 }
 
 module.exports = {

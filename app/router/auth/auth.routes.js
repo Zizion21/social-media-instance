@@ -6,6 +6,7 @@ const router = require('express').Router();
 router.post('/register', uploadImage.single('profile_image'), AuthController.register);
 router.post('/login', AuthController.login);
 router.post('/refresh-token', AuthController.refreshToken)
+router.post('/reset-password', AuthController.resetPassword)
 module.exports ={
     AuthRoutes: router
 }

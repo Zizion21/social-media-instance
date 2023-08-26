@@ -19,6 +19,10 @@ const loginValidator = Joi.object({
     password: Joi.string().required().min(6).error(new Error('Enter atleast 6 character for password.')),
 });
 
+const resetPassValidator = Joi.object({
+    email: Joi.string().email().error(new Error('Enter a valid email address.')).allow(''),
+});
+
 const updateUserInfoValidator = Joi.object({
     username: Joi.string().allow('').pattern(/^[a-z]+[a-z0-9\_\.]{4}/).error(new Error('Enter a valid username...')),
     email: Joi.string().email().error(new Error('Enter a valid email address.')).allow(''),
@@ -33,4 +37,5 @@ module.exports= {
     registerValidator,
     loginValidator,
     updateUserInfoValidator,
+    resetPassValidator,
 }

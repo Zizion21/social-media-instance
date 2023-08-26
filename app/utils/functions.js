@@ -77,6 +77,7 @@ function deleteFileInPublic(fileAddress) {
     if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
   }
 }
+
 function deleteFolderInPublic(dir) {
   if (dir) {
     const folderPath = path
@@ -86,6 +87,7 @@ function deleteFolderInPublic(dir) {
       fs.rmSync(folderPath, { recursive: true, force: true });
   }
 }
+
 async function followUser(originUser, targetUserID) {
   const addToFollowingsResult = await UserModel.updateOne(
     { _id: originUser._id },
@@ -98,6 +100,10 @@ async function followUser(originUser, targetUserID) {
   if (addToFollowingsResult.modifiedCount && addToFollowersResult.modifiedCount)
     return true;
 }
+
+function randomNumberGenerator() {
+  return Math.floor((Math.random() * 90000) + 10000);
+}
 module.exports = {
   hashPassword,
   signAccessToken,
@@ -108,4 +114,5 @@ module.exports = {
   deleteFileInPublic,
   deleteFolderInPublic,
   followUser,
+  randomNumberGenerator,
 };

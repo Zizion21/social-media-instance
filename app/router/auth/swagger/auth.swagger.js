@@ -48,6 +48,14 @@
  *              properties:
  *                  refreshToken:
  *                      type: string
+ *          ResetPassword:
+ *              type: object
+ *              required:
+ *                  -   email
+ *              properties:
+ *                  email:
+ *                      type: string
+ *                      description: Add your email to reset password
  */
 
 /**
@@ -107,6 +115,23 @@
  *                  application/x-www-form-urlencoded:
  *                      schema:
  *                          $ref: '#/components/schemas/RefreshToken'
+ *          responses:
+ *              200:
+ *                  description: Success
+ *              400:
+ *                  description: Bad Request
+ */
+/**
+ * @swagger
+ *  /auth/reset-password:
+ *      post:
+ *          tags: [UserAuth]
+ *          requestBody:
+ *              required: true
+ *              content:
+ *                  application/x-www-form-urlencoded:
+ *                      schema:
+ *                          $ref: '#/components/schemas/ResetPassword'
  *          responses:
  *              200:
  *                  description: Success
