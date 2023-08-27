@@ -6,21 +6,24 @@ const {
   verifyRefreshToken,
   deleteInvalidPropertiesOfObject,
   randomNumberGenerator,
+  sendEmail,
 } = require("../../../utils/functions");
 const {
   registerValidator,
   loginValidator,
-  resetPassValidator,
+  emailValidator,
+  passwordValidator,
 } = require("../../validators/user/auth.validator");
 const Controller = require("../controller");
 const createError = require("http-errors");
 const { StatusCodes: HttpStatus } = require("http-status-codes");
 const bcrypt = require("bcrypt");
 require("express-async-errors");
-const nodemailer = require("nodemailer");
+const { TokenModel } = require("../../../models/resetPassToken.model");
+const crypto = require("crypto");
 
 class AuthController extends Controller {
-  async register(req, res, next) {
+  async register(req, res) {
     deleteInvalidPropertiesOfObject(req.body, [
       "_id",
       "followers",
@@ -68,7 +71,7 @@ class AuthController extends Controller {
       },
     });
   }
-  async login(req, res, next) {
+  async login(req, res) {
     await loginValidator.validateAsync(req.body);
     const { username, password } = req.body;
     const user = await UserModel.findOne({ username });
@@ -93,7 +96,7 @@ class AuthController extends Controller {
       },
     });
   }
-  async refreshToken(req, res, next) {
+  async refreshToken(req, res) {
     const { refreshToken } = req.body;
     const userID = verifyRefreshToken(refreshToken);
     const newAccessToken = await signAccessToken(userID);
@@ -106,49 +109,52 @@ class AuthController extends Controller {
       },
     });
   }
-  async resetPassword(req, res, next) {
-    await resetPassValidator.validateAsync(req.body);
+  async sendResetPasswordReq(req, res) {
+    await emailValidator.validateAsync(req.body);
     const { email } = req.body;
     const user = await UserModel.findOne({ email });
     if (!user) throw createError.NotFound("User does not exist❌");
-    const code = randomNumberGenerator();
-    let resetPassCode = {
-      code,
-      expiresIn: (new Date().getTime() + 120000),
-      isConfirmed: false
+    let token = await TokenModel.findOne({ userID: user._id });
+    if (!token) {
+      token = await TokenModel.create({
+        userID: user._id,
+        token: crypto.randomBytes(16).toString("hex"),
+      });
     }
-    deleteInvalidPropertiesOfObject(resetPassCode);
-    const saveConfirmResetPassCodeResult = await user.updateOne({$set: {resetPassCode}});
-    if(!saveConfirmResetPassCodeResult) throw createError.InternalServerError('Process failed⚠️')
-    const transport = nodemailer.createTransport({
-      host: process.env.EMAIL_HOST,
-      port: process.env.EMAIL_HOST_PORT,
-      secure: false,
-      auth: {
-        user: process.env.EMAIL_HOST_USERNAME,
-        pass: process.env.EMAIL_HOST_PASS,
-      },
-      tls: {
-        rejectUnauthorized: false,
-      },
-    });
+    const link = `${process.env.BASE_URL}:${process.env.PORT}/auth/reset-password/${user._id}/${token.token}`;
     const mailOptions = {
       from: "Zizion's Scocial-Media-Instance",
       to: email,
-      subject: "Reset Password!",
-      text: `Hi ${user.username}✨
-      This is an email for you to reset your password.
-      Here is your code: ${code}`
+      subject: "Reset Password.",
+      text: `Hi ${user.username}
+      Use this link: ${link} to reset your password`,
     };
-    transport.sendMail(mailOptions, (error, info) => {
-      if (error) throw createError.InternalServerError(error);
-      return res.status(HttpStatus.OK).json({
-        statusCode: HttpStatus.OK,
-        data: {
-          // messageID: info.messageId,
-          message: `Email successfully sent to: ${info.envelope.to[0]}`,
-        },
-      });
+    const info = await sendEmail(mailOptions);
+    return res.status(HttpStatus.OK).json({
+      statusCode: HttpStatus.OK,
+      data: {
+        message: `Email successfully sent to ${info.envelope.to[0]}`,
+      },
+    });
+  }
+
+  async resetPassword(req, res) {
+    await passwordValidator.validateAsync(req.body);
+    const _id = req.params.userID;
+    const sentToken = req.params.token;
+    const user = await UserModel.findById(_id);
+    if (!user) throw createError.BadRequest("Invalid or expired link❗");
+    const token = await TokenModel.findOne({ userID: _id, token: sentToken });
+    if (!token) throw createError.BadRequest("Invalid or expired link❗");
+    const newPass = hashPassword(req.body.new_password);
+    user.password = newPass;
+    await user.save();
+    await token.deleteOne();
+    return res.status(HttpStatus.OK).json({
+      statusCode: HttpStatus.OK,
+      data: {
+        message: "Password changed successfully✔️",
+      },
     });
   }
 }

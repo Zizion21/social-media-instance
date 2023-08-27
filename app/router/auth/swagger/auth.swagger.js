@@ -48,7 +48,7 @@
  *              properties:
  *                  refreshToken:
  *                      type: string
- *          ResetPassword:
+ *          SendResetPasswordReq:
  *              type: object
  *              required:
  *                  -   email
@@ -56,6 +56,18 @@
  *                  email:
  *                      type: string
  *                      description: Add your email to reset password
+ *          ResetPassword:
+ *              type: object
+ *              required:
+ *                  -   new_password
+ *                  -   repeat
+ *              properties:
+ *                  new_password:
+ *                      type: string
+ *                      description: Enter your new password.
+ *                  repeat:
+ *                      type: string
+ *                      description: Repeat your new password.
  */
 
 /**
@@ -121,11 +133,39 @@
  *              400:
  *                  description: Bad Request
  */
+
 /**
  * @swagger
  *  /auth/reset-password:
  *      post:
  *          tags: [UserAuth]
+ *          requestBody:
+ *              required: true
+ *              content:
+ *                  application/x-www-form-urlencoded:
+ *                      schema:
+ *                          $ref: '#/components/schemas/SendResetPasswordReq'
+ *          responses:
+ *              200:
+ *                  description: Success
+ *              400:
+ *                  description: Bad Request
+ */
+
+/**
+ * @swagger
+ *  /auth/reset-password/{userID}/{token}:
+ *      post:
+ *          tags: [UserAuth]
+ *          parameters:
+ *              -   in: path
+ *                  name: userID
+ *                  required: true
+ *                  type: string
+ *              -   in: path
+ *                  name: token
+ *                  required: true
+ *                  type: string
  *          requestBody:
  *              required: true
  *              content:

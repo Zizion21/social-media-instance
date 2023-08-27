@@ -8,6 +8,7 @@ const {
 const createError = require("http-errors");
 const path = require("path");
 const fs = require("fs");
+const nodemailer = require("nodemailer");
 
 function hashPassword(password) {
   const salt = bcrypt.genSaltSync(10);
@@ -102,8 +103,30 @@ async function followUser(originUser, targetUserID) {
 }
 
 function randomNumberGenerator() {
-  return Math.floor((Math.random() * 90000) + 10000);
+  return Math.floor(Math.random() * 90000 + 10000);
 }
+
+function sendEmail(mailOptions) {
+  return new Promise((resolve, reject) => {
+    const transporter = nodemailer.createTransport({
+      host: process.env.EMAIL_HOST,
+      port: process.env.EMAIL_HOST_PORT,
+      secure: false,
+      auth: {
+        user: process.env.EMAIL_HOST_USERNAME,
+        pass: process.env.EMAIL_HOST_PASS,
+      },
+      tls: {
+        rejectUnauthorized: false, //Passing through SSL error
+      },
+    });
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) reject(error);
+      resolve(info);
+    });
+  });
+}
+
 module.exports = {
   hashPassword,
   signAccessToken,
@@ -115,4 +138,5 @@ module.exports = {
   deleteFolderInPublic,
   followUser,
   randomNumberGenerator,
+  sendEmail,
 };

@@ -29,7 +29,6 @@ const userSchema = new mongoose.Schema(
     followings: { type: [mongoose.Types.ObjectId], ref: "user", default: [] },
     notifications: { type: [notificationSchema], default: [] },
     token: { type: String, default: "" },
-    resetPassCode: { type: Object, default: { code: 0, expiresIn: 0, isConfirmed: false} },
     posts: { type: [mongoose.Types.ObjectId], ref: "post", default: [] },
     bio: { type: String, default: "" },
     isPrivate: { type: Boolean, default: false },
