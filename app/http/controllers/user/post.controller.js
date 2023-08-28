@@ -33,7 +33,10 @@ class PostsController {
       .select({ _id: 0, isShown: 0, __v: 0 })
       .populate([
         { path: "user", select: { username: 1, _id: 0 } },
-        {path: 'comments', populate: {path: 'user', select: {username: 1, _id: 0}}}
+        {
+          path: "comments",
+          populate: { path: "user", select: { username: 1, _id: 0 } },
+        },
       ]);
     if (!post) throw createError.NotFound("Post does not exist❌");
     return res.status(HttpStatus.OK).json({
@@ -181,11 +184,36 @@ class PostsController {
     });
   }
   async deleteCommentByID(req, res) {
+    const userID = req.user._id;
     await objectIdValidator.validateAsync({
       id: req.params.id,
       id: req.params.commentID,
     });
     const { id, commentID } = req.params;
+    const comment = await PostModel.findOne({ "comments._id": commentID });
+    if (!comment) throw createError.NotFound("Comment does not exist❌");
+    const deleteCommentResult = await PostModel.findOneAndUpdate(
+      {
+        _id: id,
+        $and: [
+          { user: userID },
+          {comments: { $elemMatch: {_id: commentID, user: userID}}}
+        ],
+      },
+      {
+        $pull: { comments: { _id: commentID } },
+      },
+      { new: true }
+    );
+    if (!deleteCommentResult)
+      throw createError.InternalServerError("Failed to delete the comment⚠️");
+    else
+      return res.status(HttpStatus.OK).json({
+        statusCode: HttpStatus.OK,
+        data: {
+          message: "Comment deleted successfully",
+        },
+      });
   }
 }
 module.exports = {
