@@ -115,12 +115,11 @@ class AuthController extends Controller {
     const user = await UserModel.findOne({ email });
     if (!user) throw createError.NotFound("User does not exist❌");
     let token = await TokenModel.findOne({ userID: user._id });
-    if (!token) {
-      token = await TokenModel.create({
-        userID: user._id,
-        token: crypto.randomBytes(16).toString("hex"),
-      });
-    }
+    if (token) token.deleteOne();
+    token = await TokenModel.create({
+      userID: user._id,
+      token: crypto.randomBytes(16).toString("hex"),
+    });
     const link = `${process.env.BASE_URL}:${process.env.PORT}/auth/reset-password/${user._id}/${token.token}`;
     const mailOptions = {
       from: "Zizion's Scocial-Media-Instance",
@@ -145,7 +144,9 @@ class AuthController extends Controller {
     const user = await UserModel.findById(_id);
     if (!user) throw createError.BadRequest("Invalid or expired link❗");
     const token = await TokenModel.findOne({ userID: _id, token: sentToken });
-    if (!token) throw createError.BadRequest("Invalid or expired link❗");
+    const now = Date.now();
+    if (!token || token.expires < now)
+      throw createError.BadRequest("Invalid or expired link❗");
     const newPass = hashPassword(req.body.new_password);
     user.password = newPass;
     await user.save();
@@ -158,7 +159,8 @@ class AuthController extends Controller {
     });
   }
 }
-
+//64cf54b54db418de704247ee/503de3bcffe5e2900d9c42871e2bc4f6
+//
 module.exports = {
   AuthController: new AuthController(),
 };

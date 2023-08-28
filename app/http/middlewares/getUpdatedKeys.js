@@ -1,4 +1,4 @@
-const { copyObject, deleteInvalidPropertiesOfObject } = require("../../utils/functions");
+const { deleteInvalidPropertiesOfObject } = require("../../utils/functions");
 
 module.exports = async function getUpdatedKeys(req, res, next){
     const user = req.user;

@@ -50,6 +50,24 @@
  *  /user/posts:
  *      get:
  *          tags: [User(PostSection)]
+ *          summary: Getting all of the user's posts.
+ *          responses:
+ *              200:
+ *                  description: Success
+ *              400:
+ *                  description: Bad Request
+ */
+/**
+ * @swagger
+ *  /user/posts/{id}:
+ *      get:
+ *          tags: [User(PostSection)] 
+ *          summary: Getting a post by its ID.
+ *          parameters:
+ *              -   in: path
+ *                  type: string
+ *                  name: id
+ *                  required: true
  *          responses:
  *              200:
  *                  description: Success
@@ -62,6 +80,7 @@
  *  /user/posts/new:
  *      post:
  *          tags: [User(PostSection)]
+ *          summary: Creating a new post.
  *          requestBody:
  *              required: true
  *              content:
@@ -80,6 +99,7 @@
  *  /user/posts/edit/{id}:
  *      patch:
  *          tags: [User(PostSection)]
+ *          summary: Edit/update a post by its ID.
  *          parameters:
  *              -   in: path
  *                  type: string
@@ -103,6 +123,7 @@
  *  /user/posts/delete/{id}:
  *      delete:
  *          tags: [User(PostSection)]
+ *          summary: Delete a post by its ID.
  *          parameters:
  *              -   in: path
  *                  type: string
@@ -135,6 +156,7 @@
  *  /user/posts/{id}/leave-comments:
  *      patch:
  *          tags: [User(PostSection)]
+ *          summary: Leave comments on posts by postID.
  *          parameters:
  *              -   in: path
  *                  type: string
@@ -146,6 +168,27 @@
  *                  application/x-www-form-urlencoded:
  *                      schema:
  *                          $ref: '#/components/schemas/LeaveComments'
+ *          responses:
+ *              200:
+ *                  description: Success
+ *              500:
+ *                  description: Server Error
+ */
+/**
+ * @swagger
+ *  /user/posts/{id}/{commentID}:
+ *      patch:
+ *          tags: [User(PostSection)]
+ *          summary: Delete a comment by postID and commentID
+ *          parameters:
+ *              -   in: path
+ *                  type: string
+ *                  name: id
+ *                  required: true
+ *              -   in: path
+ *                  type: string
+ *                  name: commentID
+ *                  required: true
  *          responses:
  *              200:
  *                  description: Success

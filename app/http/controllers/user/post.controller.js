@@ -13,7 +13,9 @@ class PostsController {
   async gettingAllPosts(req, res, next) {
     try {
       const userID = req.user._id;
-      const posts = await PostModel.find({ user: userID });
+      const posts = await PostModel.find({ user: userID })
+        .select({ __v: 0, isShown: 0, user: 0 })
+        .sort({ _id: -1 });
       return res.status(HttpStatus.OK).json({
         statusCode: HttpStatus.OK,
         data: {
@@ -23,6 +25,23 @@ class PostsController {
     } catch (error) {
       next(error);
     }
+  }
+  async getPostsByID(req, res) {
+    await objectIdValidator.validateAsync({ id: req.params.id });
+    const { id } = req.params;
+    const post = await PostModel.findById(id)
+      .select({ _id: 0, isShown: 0, __v: 0 })
+      .populate([
+        { path: "user", select: { username: 1, _id: 0 } },
+        {path: 'comments', populate: {path: 'user', select: {username: 1, _id: 0}}}
+      ]);
+    if (!post) throw createError.NotFound("Post does not exist❌");
+    return res.status(HttpStatus.OK).json({
+      statusCode: HttpStatus.OK,
+      data: {
+        post,
+      },
+    });
   }
   async newPost(req, res, next) {
     try {
@@ -99,11 +118,10 @@ class PostsController {
         },
       });
     } catch (error) {
-      console.log(error);
       next(error);
     }
   }
-  async likePostsByID(req, res, next) {
+  async likePostsByID(req, res) {
     const { _id: userID } = req.user;
     const { id: postID } = await objectIdValidator.validateAsync(req.params);
     const post = await PostModel.findById(postID);
@@ -136,21 +154,21 @@ class PostsController {
       },
     });
   }
-  async leaveCommentsByPostID(req, res, next) {
+  async leaveCommentsByPostID(req, res) {
     const { _id: userID } = req.user;
     const { id: postID } = await objectIdValidator.validateAsync(req.params);
     const post = await PostModel.findById(postID);
     if (!post) throw createError.NotFound("Post not found");
     const { text } = req.body;
     const updatePostResult = await PostModel.updateOne(
-      { _id: postID},
+      { _id: postID },
       {
-        $push:{
-          'comments':{
+        $push: {
+          comments: {
             user: userID,
-            text
-          }
-        }
+            text,
+          },
+        },
       }
     );
     if (!updatePostResult)
@@ -161,6 +179,13 @@ class PostsController {
         message: "Comment sent successfully✔️",
       },
     });
+  }
+  async deleteCommentByID(req, res) {
+    await objectIdValidator.validateAsync({
+      id: req.params.id,
+      id: req.params.commentID,
+    });
+    const { id, commentID } = req.params;
   }
 }
 module.exports = {

@@ -21,30 +21,42 @@ class UserController extends Controller {
     const { _id } = req.user;
     const threeDaysAgo = new Date();
     threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
-    const userFollowings = await UserModel.findOne({ _id })
-      .populate({
-        path: "followings",
-        select: { _id: 0, posts: 1 },
-        populate: {
-          path: "posts",
-          select: { isShown: 0, __v: 0 },
-          match: { 
-            isShown: true, 
-            createdAt: { 
-              $gte: threeDaysAgo 
-            } 
+    const userFollowings = await UserModel.findOne({ _id }).populate({
+      path: "followings",
+      select: { _id: 0, posts: 1 },
+      populate: {
+        path: "posts",
+        select: { isShown: 0, __v: 0 },
+        match: {
+          isShown: true,
+          createdAt: {
+            $gte: threeDaysAgo,
           },
-          options: {sort: {createdAt: -1}}
         },
-      });
+        options: { sort: { createdAt: -1 } },
+      },
+    });
     return res.send(userFollowings.followings);
   }
   async getUserProfile(req, res, next) {
     const user = req.user;
+    const fullName =
+      user.first_name && user.last_name
+        ? `${user.first_name} ${user.last_name}`
+        : user.first_name || user.last_name || undefined;
+    const selected = {
+      username: user.username,
+      profile_image: user.profile_image,
+      posts: user.posts,
+      followers: user.followers,
+      followings: user.followings,
+      fullName,
+      bio: user.bio,
+    };
     return res.status(HttpStatus.OK).json({
       statusCode: HttpStatus.OK,
       data: {
-        user: user,
+        user: selected,
       },
     });
   }
